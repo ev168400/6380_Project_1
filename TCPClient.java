@@ -3,18 +3,17 @@ import java.io.*;
 
 public class TCPClient {
 
-    String ServerHost;
-    String ClientHost;
-	int ServerPort;
-    int UID;
-    int serverUID;
-	Socket ClientSocket;
+    String ServerHost; //dcxx
+    String ClientHost; //dcxx
+	int ServerPort; //listening port
+    int UID; //client uid
+    int serverUID; //server uid
+	Socket ClientSocket; 
 	ObjectInputStream inStream;
 	ObjectOutputStream outStream;
 	Node dsNode;
 
-    public TCPClient(int UID, int serverPort, String ServerHost, String ClientHost, int serverUID,
-			Node _dsNode) {
+    public TCPClient(int UID, int serverPort, String ServerHost, String ClientHost, int serverUID, Node _dsNode) {
 		this.ServerHost = ServerHost;
 		this.ServerPort = serverPort;
 		this.UID = UID;
@@ -40,7 +39,4 @@ public class TCPClient {
 			System.exit(1);
 		}
 	}
-    
-
-
 }
