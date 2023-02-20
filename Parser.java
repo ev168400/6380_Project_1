@@ -19,11 +19,13 @@ public class Parser {
 		b.readLine();
 		int numberOfNodes = Integer.parseInt(b.readLine());
 
+        b.readLine();
         //Reads "# nodeUID hostName listeningPort"
         b.readLine();
         int UID = 0;
         String Hostname = "";
         int Port = 0;
+        int orderUID[] = new int[numberOfNodes];
 
         //While loop to read each line and get info on each node
         for(int i = 0; i < numberOfNodes; i++){
@@ -40,36 +42,33 @@ public class Parser {
 				Port = Integer.parseInt(s[2]);
             }
             nodeList.put(UID, new Node(UID, Hostname, Port, NeighborNodes));
+            orderUID[i] = UID;
 
             //Initiate the neighbor list for each node by entering all nodes in the nodeList
             nodeList.get(UID).Neighbors.put(UID, new ArrayList<>());
         }        
         
-        
+        b.readLine();
         //Reads "# space delimited list of neighbors for each node"
         b.readLine();
 
+        int counter = 0;
         //While loop to get each node's neighbors
         while((readLine = b.readLine()) != null){
+            //Read the line and trim off leading or trailing space
             readLine = readLine.trim();
-            String[] s = readLine.split("\\s+");
-            for (int i = 1; i < s.length; i++) {
-                //Check if the neighbor is already listed
-                Boolean present = nodeList.get(Integer.parseInt(s[0])).Neighbors.get(Integer.parseInt(s[0])).contains(nodeList.get(Integer.parseInt(s[i])));
-                //If it is not add it to the neighbor list
-                if(!present){
-                    nodeList.get(Integer.parseInt(s[0])).Neighbors.get(Integer.parseInt(s[0])).add(nodeList.get(Integer.parseInt(s[i])));
-                }
 
-                //Make sure the connection is made both ways
-                present = nodeList.get(Integer.parseInt(s[i])).Neighbors.get(Integer.parseInt(s[i])).contains(nodeList.get(Integer.parseInt(s[0])));
-                //If it is not add it to the neighbor list
-                if(!present){
-                    nodeList.get(Integer.parseInt(s[i])).Neighbors.get(Integer.parseInt(s[i])).add(nodeList.get(Integer.parseInt(s[0])));
-                }
+            //Split based on space
+            String[] s = readLine.split("\\s+");
+            
+            //Add Neighbor
+            for (int i = 0; i < s.length; i++) {
+                nodeList.get(orderUID[counter]).Neighbors.get(orderUID[counter]).add(nodeList.get(Integer.parseInt(s[i])));
             }
+            counter++;
         }
 
+        //Close the buffered reader
         b.close();
     }
     
