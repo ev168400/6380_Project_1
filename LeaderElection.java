@@ -1,3 +1,5 @@
+import java.io.IOException;
+
 public class LeaderElection {
     Node node;
 
@@ -19,6 +21,7 @@ public class LeaderElection {
         }
 
         //Once the leader has been found 
+        System.out.println("New leader has been elected: " + node.getNodeUID());
 
     }
 
@@ -27,7 +30,7 @@ public class LeaderElection {
         //If this is the first round
         if(node.phase == 0){
             //create a message with the nodes own UID as the highest
-            message = new Messages(node.nodeUID, node.phase, node.nodeUID, Type.SEND);
+            message = new Messages(node.getNodeUID(), node.phase, node.getNodeUID(), Type.SEND);
 
         }//Else check the message the message queue
         else{
@@ -43,13 +46,17 @@ public class LeaderElection {
             }
 
             //Create new message with highest 
-            message = new Messages(node.currentHighestUID, node.phase, node.nodeUID, Type.SEND);
+            message = new Messages(node.currentHighestUID, node.phase, node.getNodeUID(), Type.SEND);
         }
 
         //Send out the new message
-        //dsNode.connectedClients.forEach((clientHandler) ->{
-          //  clientHandler.getOutputWriter().writeObject(message);
-        //});
+        node.connectedClients.forEach((clientHandler) ->{
+            try {
+                clientHandler.getOutputWriter().writeObject(message);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
 
         //After the message has been sent increment the phase
         node.phase++;

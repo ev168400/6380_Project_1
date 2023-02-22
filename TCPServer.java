@@ -1,27 +1,27 @@
 import java.io.IOException;
-import java.net.ServerSocket;
+import java.net.*;
 
 //Server Class
 public class TCPServer {
-    String hostName;
-    int portNumber;
-    int UID;
-    ServerSocket serverSocket;
-    Node node;
+  String hostName;
+  int portNumber;
+  int UID;
+  ServerSocket serverSocket;
+  Node node;
     
-    public TCPServer(){}
+  public TCPServer(){}
 
-    public TCPServer(String hostName, int portNumber, int UID){
-        this.hostName = hostName;
-        this.portNumber = portNumber;
-        this.UID = UID;
-        
-    }
+  public TCPServer(String hostName, int portNumber, int UID){
+    this.hostName = hostName;
+    this.portNumber = portNumber;
+    this.UID = UID;    
+  }
 
-    public TCPServer(Node _dsNode) {
-		// hard coded local host for now
-		this(_dsNode.hostName, _dsNode.listeningPort, _dsNode.nodeUID);
-		this.node = _dsNode;
+  public TCPServer(Node dsNode) {
+    this.node = dsNode;
+    this.UID = dsNode.getNodeUID();
+    this.portNumber = dsNode.getNodeListeningPort();
+    this.hostName = dsNode.getNodeHostName();
 	}
 
 	public void listenSocket() {
@@ -32,7 +32,23 @@ public class TCPServer {
 			System.out.println(e);
 			System.exit(-1);
 		}
-    }
 
-    
+		Handler reqHandler;
+		try {
+			// server.accept returns a client connection
+			Socket clientreqSocket = serverSocket.accept();
+			reqHandler = new Handler(clientreqSocket, this.node);
+      System.out.println("Accepted node: " + node.nodeUID);
+			// add all the connected clients
+			node.addClient(reqHandler);
+
+			// assign each client request to a separate thread
+			Thread t = new Thread(reqHandler);
+			t.start();
+
+		} catch (IOException e) {
+			System.out.println("Accept failed");
+			System.exit(-1);
+		}
+	} 
 }
