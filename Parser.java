@@ -75,7 +75,7 @@ public class Parser {
         b.close();
         
         for(int i = 0; i < orderHostname.length; i++){
-            if(nodeList.get(orderHostname[i]).hostName == hostName){
+            if(nodeList.get(orderHostname[i]).hostName.compareTo(hostName) == 0){
                 node = nodeList.get(orderHostname[i]);
             }
         }

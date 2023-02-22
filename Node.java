@@ -1,5 +1,4 @@
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 
 
@@ -15,6 +14,7 @@ public class Node {
     int pulseNum;
     int distanceFromHighest;
     BlockingQueue messageQueue;
+    List<Handler> connectedClients = Collections.synchronizedList(new ArrayList<Handler>());
 
     public Node(){}
     
@@ -41,5 +41,11 @@ public class Node {
     public int getCurrentHighestUID(){return currentHighestUID;}
     public Messages getMessage(){return (Messages) messageQueue.poll();}
     public Messages checkMessage(){return (Messages) messageQueue.peek();}
+    public List<Handler> getAllConnectedClients() {return this.connectedClients;}
 
+    public void addClient(Handler client) {
+		synchronized (connectedClients) {
+			connectedClients.add(client);
+		}
+	}
 }

@@ -31,6 +31,8 @@ public class TCPClient {
 
     public void clientListeningSocket(){
         try {
+            //cant find hostname since it does not include .utdallas.edu
+            //clientHostName = clientHostName + ".utdallas.edu";
             clientsocket = new Socket(serverHostName, serverPortNumber, InetAddress.getByName(clientHostName), 0);
             out = new ObjectOutputStream(clientsocket.getOutputStream());
             out.flush();
