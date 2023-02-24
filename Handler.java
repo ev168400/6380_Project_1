@@ -1,11 +1,10 @@
 import java.io.*;
 import java.net.*;
- 
- class Handler implements Runnable{
-    private Socket client;
+
+class Handler implements Runnable {
+	private Socket client;
 	ObjectInputStream in;
 	ObjectOutputStream out;
-	private String clientUID;
 	Node dsNode;
 	boolean isChild = true;
 
@@ -14,12 +13,13 @@ import java.net.*;
 		this.dsNode = dsNode;
 	}
 
-    //getters
-    public ObjectInputStream getInputReader() {return in;}
+	// getters
+	public ObjectInputStream getInputReader() {return in;}
 	public ObjectOutputStream getOutputWriter() {return out;}
+	public int getSocket(){ return client.getLocalPort();}
 
-    public void run() {
-        try {
+	public void run() {
+		try {
 			in = new ObjectInputStream(client.getInputStream());
 			out = new ObjectOutputStream(client.getOutputStream());
 			out.flush();
@@ -30,21 +30,20 @@ import java.net.*;
 
 		while (true) {
 			try {
-				// Read data from client
-
+				// Read data from client 
+				System.out.println("Node: " + dsNode.getNodeUID() +" ready and waiting");				
 				// InitialHandShake read
 				Object msg = in.readObject();
 				if (msg instanceof String) {
 					String message = msg.toString();
-					String[] msgArr = message.split("!");
-					this.clientUID = msgArr[1];
-					System.out.println("Text received from client: " + this.clientUID);
+					System.out.println(message);
 				}
 
 				else if (msg instanceof Messages) {
 					Messages broadcastMessage = (Messages) in.readObject();
 					// add received messages to Blocking queue
 					this.dsNode.addMessageToQueue(broadcastMessage);
+					System.out.println("Added Message: " + broadcastMessage);
 				}
 
 			} catch (IOException | ClassNotFoundException e) {
@@ -52,5 +51,5 @@ import java.net.*;
 				System.exit(-1);
 			}
 		}
-    }
+	}
 }

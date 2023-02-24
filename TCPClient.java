@@ -6,55 +6,72 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 //Client Class
-//TODO change variable names
 public class TCPClient {
     String serverHostName;
     String clientHostName;
-	int serverPortNumber;
+        int serverPortNumber;
     int UID;
     int serverUID;
-	Socket clientsocket;
-	ObjectInputStream in;
-	ObjectOutputStream out;
-	Node node;
+        Socket clientsocket;
+        ObjectInputStream in;
+        ObjectOutputStream out;
+        Node node;
 
     public TCPClient(){}
 
     public TCPClient(int UID, int serverPortNumber, String serverHostName, String clientHostName, int serverUID,
-    Node _dsNode){
+    Node dsNode){
         this.UID = UID;
         this.serverHostName = serverHostName;
-		this.serverPortNumber = serverPortNumber;
-		this.clientHostName = clientHostName;
-		this.serverUID = serverUID;
+                this.serverPortNumber = serverPortNumber;
+                this.clientHostName = clientHostName;
+                this.serverUID = serverUID;
+                this.node = dsNode;
     }
 
     public void clientListeningSocket(){
         try {
-            //cant find hostname since it does not include .utdallas.edu
-            //clientHostName = clientHostName + ".utdallas.edu";
-            clientsocket = new Socket(serverHostName, serverPortNumber, InetAddress.getByName(clientHostName), 0);
-            out = new ObjectOutputStream(clientsocket.getOutputStream());
-            out.flush();
+             	clientHostName = clientHostName + ".utdallas.edu";
+                serverHostName = serverHostName + ".utdallas.edu";
+                clientsocket = new Socket(serverHostName, serverPortNumber, InetAddress.getByName(clientHostName), 0);
 
-			in = new ObjectInputStream(clientsocket.getInputStream());
+                out = new ObjectOutputStream(clientsocket.getOutputStream());
+                out.flush();
+
+                in = new ObjectInputStream(clientsocket.getInputStream());
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        }	
+        }
     }
 
     public void recieveMessage(){
         try {
-            Messages messageRecieved = (Messages) in.readObject();
-            node.addMessageToQueue(messageRecieved);
-            if(messageRecieved.typeOfMessage == Type.LEADER){
-                node.leaderFound = true;
+            while(true){
+                System.out.println("Node: " + node.getNodeUID() + " ready for messages");
+                Messages messageRecieved = (Messages) in.readObject();
+                node.addMessageToQueue(messageRecieved);
+                if(messageRecieved.typeOfMessage == Type.LEADER){
+                    node.leaderFound = true;
+                }
             }
-        } catch (ClassNotFoundException e) {
+	} catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+    
+    }
+
+    public void establishConnection(){
+        try{
+            String msg = Integer.toString(node.getNodeUID());
+            out.writeObject(msg);
+            out.flush();
+            System.out.println(node.getNodeUID() + " sent a message to " + serverUID);
+        }catch(Exception e){
+            System.out.println("Node: " + node.getNodeUID() + " failed connection with " + serverUID);
             e.printStackTrace();
         }
     }

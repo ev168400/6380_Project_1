@@ -6,19 +6,19 @@ import java.util.*;
 public class Parser {
 
     final static HashMap<String, Node> nodeList = new HashMap<>();
-    
+
     public static Node parseFile(String path, String hostName) throws Exception{
         Node node = new Node();
         HashMap<Integer, ArrayList<Node>> NeighborNodes = new HashMap<>();
         HashMap<Integer, Node> NeighborCreator = new HashMap<>();
 
         BufferedReader b = new BufferedReader(new FileReader(path));
-       
+
         String readLine = "";
 
         //Reads "# number of nodes in system"
-		b.readLine();
-		int numberOfNodes = Integer.parseInt(b.readLine());
+                b.readLine();
+                int numberOfNodes = Integer.parseInt(b.readLine());
 
         b.readLine();
         //Reads "# nodeUID hostName listeningPort"
@@ -37,10 +37,10 @@ public class Parser {
             String[] s = readLine.split("\\s+");
 
             //Assign the variables from the line
-			for(int j=0;j<s.length;j++){
-				UID = Integer.parseInt(s[0]);
-				Hostname = s[1];
-				Port = Integer.parseInt(s[2]);
+                        for(int j=0;j<s.length;j++){
+                                UID = Integer.parseInt(s[0]);
+                                Hostname = s[1];
+                                Port = Integer.parseInt(s[2]);
             }
             Node addNode = new Node(UID, Hostname, Port, NeighborNodes);
             nodeList.put(Hostname, addNode);
@@ -49,9 +49,9 @@ public class Parser {
 
             //Initiate the neighbor list for each node by entering all nodes in the nodeList
             nodeList.get(Hostname).Neighbors.put(UID, new ArrayList<>());
-        }        
-        
-        b.readLine();
+        }
+
+	b.readLine();
         //Reads "# space delimited list of neighbors for each node"
         b.readLine();
 
@@ -63,7 +63,7 @@ public class Parser {
 
             //Split based on space
             String[] s = readLine.split("\\s+");
-            
+
             //Add Neighbor
             for (int i = 0; i < s.length; i++) {
                 nodeList.get(orderHostname[counter]).Neighbors.get(nodeList.get(orderHostname[counter]).nodeUID).add(NeighborCreator.get(Integer.parseInt(s[i])));
@@ -71,15 +71,15 @@ public class Parser {
             counter++;
         }
 
-        //Close the buffered reader
+	//Close the buffered reader
         b.close();
-        
+
         for(int i = 0; i < orderHostname.length; i++){
             if(nodeList.get(orderHostname[i]).hostName.compareTo(hostName) == 0){
                 node = nodeList.get(orderHostname[i]);
             }
-        }
-        return node;
+	}
+	return node;
     }
-    
+
 }

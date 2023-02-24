@@ -1,6 +1,7 @@
+import java.io.Serializable;
 
-//Template to create messages that will be sent from node to node
-public class Messages {
+//Template to create messages that will be sent from node to node 
+public class Messages implements Serializable {
     int highestUID;
     int phase;
     int UIDofSender;
@@ -20,4 +21,6 @@ public class Messages {
     public int getPhase(){return phase;}
     public int getUIDofSender(){return UIDofSender;}
     public Type getTypeOfMessage(){return typeOfMessage;}
+
+ 
 }
