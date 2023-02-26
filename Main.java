@@ -12,11 +12,11 @@ public class Main {
 			e1.printStackTrace();
 		}
 
-		Node dsNode = BuildNode(clientHostName);
+		Node mainNode = BuildNode(clientHostName);
 
 		Runnable serverRunnable = new Runnable() {
 			public void run() {
-				TCPServer server = new TCPServer(dsNode);
+				TCPServer server = new TCPServer(mainNode);
 				// start listening for client requests
 				server.listenSocket();
 			}
@@ -41,10 +41,11 @@ public class Main {
 
 									TCPClient client = new TCPClient(node.getValue().getNodeUID(),
 											m.getNodeListeningPort(),
-											m.getNodeHostName(), node.getValue().hostName, m.getNodeUID(), dsNode);
+											m.getNodeHostName(), node.getValue().hostName, m.getNodeUID(), mainNode);
 									client.clientListeningSocket();
 									client.establishConnection();
 									client.recieveMessage();
+
 								}
 							};
 							Thread clientthread = new Thread(clientRunnable);
@@ -58,26 +59,33 @@ public class Main {
 			}
 		}
 		try {
-			while (dsNode.connectedClients.size() < dsNode.Neighbors.get(dsNode.getNodeUID()).size()) {
+			while (mainNode.connectedClients.size() < mainNode.Neighbors.get(mainNode.getNodeUID()).size()) {
 				Thread.sleep(10000);
 			}
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println("Node: " + dsNode.getNodeUID() + " Client Size: " + dsNode.connectedClients.size());
-		// LeaderElection algorithm = new LeaderElection(dsNode);
-		// algorithm.startLeaderElection();
+		System.out.println("Leader Election Initiated");
+		LeaderElection algorithm = new LeaderElection(mainNode);
+		algorithm.startLeaderElection();
 
+		mainNode.messageQueue.clear();
+
+		System.out.println("Tree Construction Started");
+		BFSTree tree = new BFSTree(mainNode);
+		tree.startBFSTree();
+		System.out.println("Node " + mainNode.getNodeUID() + " Degree: " + mainNode.getDegree() + " Parent: "
+				+ mainNode.getParent() + " Children: " + mainNode.getChildren());
 	}
 
 	public static Node BuildNode(String clientHostName) {
-		Node dsNode = new Node();
+		Node mainNode = new Node();
 		try {
-			dsNode = Parser.parseFile("/home/010/e/ej/ejv190000/CS6380/Proj1/launch/config.txt", clientHostName);
+			mainNode = Parser.parseFile("/home/010/e/ej/ejv190000/CS6380/Proj1/launch/config.txt", clientHostName);
 		} catch (Exception e) {
 			throw new RuntimeException("Unable to get nodeList", e);
 		}
-		return dsNode;
+		return mainNode;
 	}
 }

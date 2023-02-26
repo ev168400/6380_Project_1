@@ -1,5 +1,5 @@
 public enum Type {
     SEND,
-    RESPONSE,
-    LEADER
+    SEARCH,
+    RESPONSE
 }
