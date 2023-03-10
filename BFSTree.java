@@ -16,11 +16,10 @@ public class BFSTree {
     }
 
     public void startBFSTree() {
-        // While the node has not recieved confirmations from all neighbors on parent/child status
-        int count = 0;
-        while (notChild.size() + root.getChildrenSize() < root.getNeighbors().get(root.getNodeUID()).size() && count < 50) {
+        // While the node has not recieved confirmations from all neighbors on
+        // parent/child status
+        while (notChild.size() + root.getChildrenSize() < root.getNeighbors().get(root.getNodeUID()).size()) {
             CreateTree();
-            count++;
         }
         System.out.println("Tree is complete");
     }
@@ -93,7 +92,14 @@ public class BFSTree {
                     }
                 }
             }
-
+            // If the message queue is empty give the children a second to respond
+            else {
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         } // If the node is not the leader, check message queue for parent notifications
         else {
             // Give the root node a second to send out its first message
@@ -102,28 +108,7 @@ public class BFSTree {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            // If the parent has not yet sent its preliminary message
-            if (!ParentReachedOut) {
-                // Create message for neighbors
-                Messages message = new Messages(root.getNodeUID(), root.phase, root.getNodeUID(), Type.SEARCH);
 
-                // Send out the new message to all clients
-                root.connectedClients.forEach((clientHandler) -> {
-                    try {
-                        clientHandler.getOutputWriter().writeObject(message);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
-
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                this.ParentReachedOut = true;
-            }
             // Check queue
             if (!root.messageQueue.isEmpty()) {
                 // If it is a search
@@ -137,8 +122,10 @@ public class BFSTree {
                         root.getMessage();
                     }
                     // Create acknowledgement message to send
-                    // Format message = new Messages(root.ParentUID, root.phase, root.UID,Type.RESPONSE);
-                    Messages childAcknowledgment = new Messages(root.getParent(), root.phase, root.getNodeUID(), Type.RESPONSE);
+                    // Format message = new Messages(root.ParentUID, root.phase,
+                    // root.UID,Type.RESPONSE);
+                    Messages childAcknowledgment = new Messages(root.getParent(), root.phase, root.getNodeUID(),
+                            Type.RESPONSE);
 
                     // Send response for parent
                     root.connectedClients.forEach((clientHandler) -> {
@@ -150,14 +137,35 @@ public class BFSTree {
                     });
 
                     try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    // Send search as well
+                    // Create message for neighbors
+                    Messages parentReach = new Messages(root.getNodeUID(), root.phase, root.getNodeUID(), Type.SEARCH);
+                    // Send response for parent
+                    root.connectedClients.forEach((clientHandler) -> {
+                        try {
+                            clientHandler.getOutputWriter().writeObject(parentReach);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+
+                    try {
                         Thread.sleep(5000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+
                 } // Else if it is a response
                 else if (root.checkMessage().getTypeOfMessage() == Type.RESPONSE) {
-                    // Check who the intended parent is - Highest UID is holding intended parent UID
+                    // Check who the intended parent is
+                    // Highest UID is holding intended parent UID
                     if (root.getNodeUID() == root.checkMessage().highestUID) {
+
                         // make sure we don't already have the child
                         if (!root.children.contains(root.checkMessage().UIDofSender)) {
                             root.addChild(root.getMessage().UIDofSender);
@@ -167,7 +175,8 @@ public class BFSTree {
                         }
                     } // If this is not the intended parent then add to not child list
                     else {
-                        // If they have not yet been informed this node is not their child, add it to the not child list
+                        // If they have not yet been informed this node is not their child, add it to
+                        // the not child list
                         if (!notChild.contains(root.checkMessage().UIDofSender)) {
                             notChild.add(root.getMessage().UIDofSender);
                         } // Else discard the message
@@ -180,8 +189,6 @@ public class BFSTree {
                     root.getMessage();
                 }
             }
-
         }
-
     }
 }
